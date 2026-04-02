@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class StateMachine : MonoBehaviour
 {
@@ -18,7 +20,8 @@ public class StateMachine : MonoBehaviour
 
     [Header("Vision")]
     public float viewRadius = 10f;
-    [Range(0, 360)] public float viewAngle = 290f;
+    [Range(0, 360)] public float viewAngle = 340f;
+    bool canSeePlayer = false;
 
     State state;
 
@@ -120,6 +123,42 @@ public class StateMachine : MonoBehaviour
     #endregion
 
     #region Support Methods
-    
+    bool IsInView()
+    {
+        Vector3 toPlayer = player.transform.position - transform.position;
+        float distToPlayer = toPlayer.magnitude;
+
+        // 1. Distance check
+        if (distToPlayer > viewRadius) return false;
+
+        // 2. Angle check
+        Vector3 dirToPlayer = toPlayer.normalized;
+        float angle = Vector3.Angle(transform.forward, dirToPlayer);
+
+        if (angle > viewAngle * 0.5f) return false;
+
+        // 3. Raycast
+        if (Physics.Raycast(transform.position, dirToPlayer, out RaycastHit hit, viewRadius))
+        {
+            return hit.transform == player.transform;
+        }
+        return false;
+    }
+    #endregion
+
+    #region Debug Methods
+    private void OnDrawGizmos()
+    {
+        // Draw the view cone of the NPC
+        //if (state != State.Idle)
+        //{
+            Handles.color = new Color(0f, 1f, 1f, 0.25f);
+            if (canSeePlayer) Handles.color = new Color(1f, 0f, 0f, 0.25f);
+
+            Vector3 forward = transform.forward;
+            Handles.DrawSolidArc(transform.position, Vector3.up, forward, viewAngle / 2f, viewRadius);
+            Handles.DrawSolidArc(transform.position, Vector3.up, forward, -viewAngle / 2f, viewRadius);
+        //}
+    }
     #endregion
 }

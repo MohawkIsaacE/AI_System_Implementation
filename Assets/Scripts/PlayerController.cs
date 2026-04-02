@@ -6,7 +6,8 @@ using UnityEngine.InputSystem.XR;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5.0f;
+    public float moveSpeedNormal = 5.0f;
+    public float moveSpeedSneak = 2.0f;
     public float gravity = -9.81f;
 
     public InputActionReference moveInput;
@@ -14,6 +15,7 @@ public class PlayerController : MonoBehaviour
     CharacterController controller;
     PlayerInput playerInput;
     Vector3 velocity;
+    bool isSneaking;
 
     void Awake()
     {
@@ -35,7 +37,18 @@ public class PlayerController : MonoBehaviour
 
         Vector2 moveDirection = playerInput.currentActionMap["Move"].ReadValue<Vector2>();
         Vector3 move = Vector3.right * moveDirection.x + Vector3.forward * moveDirection.y;
-        Vector3 moveVelocity = move * moveSpeed;
+        Vector3 moveVelocity;
+
+        // Change speed if the player is holding the sneak button
+        isSneaking = playerInput.currentActionMap["Sneak"].IsPressed();
+        if (isSneaking)
+        {
+            moveVelocity = move * moveSpeedSneak;
+        }
+        else
+        {
+            moveVelocity = move * moveSpeedNormal;
+        }
 
         velocity.y += gravity * Time.deltaTime;
 
