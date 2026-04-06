@@ -1101,7 +1101,7 @@ PrefabInstance:
       objectReference: {fileID: 1103504839}
     - target: {fileID: 7517686996393243830, guid: 553413393fe29a54c90411067fefee35, type: 3}
       propertyPath: speedFlee
-      value: 7
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7517686996393243830, guid: 553413393fe29a54c90411067fefee35, type: 3}
       propertyPath: stateText
@@ -1125,7 +1125,7 @@ PrefabInstance:
       objectReference: {fileID: 422584701}
     - target: {fileID: 7517686996393243830, guid: 553413393fe29a54c90411067fefee35, type: 3}
       propertyPath: idleTimeThreshold
-      value: 5
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7517686996393243830, guid: 553413393fe29a54c90411067fefee35, type: 3}
       propertyPath: alertTimeThreshold

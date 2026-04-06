@@ -19,11 +19,11 @@ public class StateMachine : MonoBehaviour
 
     [Header("Config")]
     public float speedNormal = 4f;
-    public float speedFlee = 7f;
+    public float speedFlee = 10f;
 
     [Header("Idle")]
     public float idleTimeElapsed = 0f;
-    public float idleTimeThreshold = 5f;
+    public float idleTimeThreshold = 3f;
 
     [Header("Wander")]
     public int chosenWanderWaypoint;
@@ -192,19 +192,26 @@ public class StateMachine : MonoBehaviour
         {
             Vector3 dirToAlert = (player.transform.position - transform.position).normalized;
             lookAtAlert = Quaternion.LookRotation(dirToAlert);
-            // Reset the alert timer
-            alertTimeElapsed = 0;
+            // Decrease the alert timer
+            alertTimeElapsed -= Time.deltaTime;
+        }
+        else
+        {
+            alertTimeElapsed += Time.deltaTime;
         }
 
         // Look at the position of the thing that alerted the npc
         transform.rotation = Quaternion.Lerp(transform.rotation, lookAtAlert, 2 * Time.deltaTime);
 
         // Be alert for a set amount of time
-        alertTimeElapsed += Time.deltaTime;
-
         if (alertTimeElapsed > alertTimeThreshold)
         {
             EnterWander();
+        }
+        else if (alertTimeElapsed < -2f)
+        {
+            // Flee if the player continues to alert the npc
+            EnterFlee();
         }
     }
 
@@ -233,11 +240,6 @@ public class StateMachine : MonoBehaviour
         if (isCloseToHome)
         {
             EnterIdle();
-        }
-
-        if (IsInView())
-        {
-            EnterAlert();
         }
     }
     #endregion
