@@ -44,6 +44,10 @@ public class StateMachine : MonoBehaviour
     [Range(0, 360)] public float viewAngle = 340f;
     bool canSeePlayer = false;
 
+    [Header("Sound")]
+    bool heardSound;
+    Vector3 soundPosition;
+
     // NPC
     State state;
     NavMeshAgent agent;
@@ -195,6 +199,11 @@ public class StateMachine : MonoBehaviour
             // Decrease the alert timer
             alertTimeElapsed -= Time.deltaTime;
         }
+        else if (heardSound)
+        {
+            heardSound = false;
+            lookAtAlert = Quaternion.LookRotation(soundPosition);
+        }
         else
         {
             alertTimeElapsed += Time.deltaTime;
@@ -272,6 +281,12 @@ public class StateMachine : MonoBehaviour
             return hit.transform == player.transform;
         }
         return false;
+    }
+
+    public void SoundTrigger(SoundObject sound)
+    {
+        heardSound = true;
+        soundPosition = sound.transform.position;
     }
     #endregion
 
