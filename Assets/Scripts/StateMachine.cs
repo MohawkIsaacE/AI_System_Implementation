@@ -31,6 +31,11 @@ public class StateMachine : MonoBehaviour
     public int grazeChance = 45;
     public int goHomeChance = 90;
 
+    [Header("Alert")]
+    public float alertTimeElapsed = 0f;
+    public float alertTimeThreshold = 5f;
+    Quaternion lookAtAlert;
+
     [Header("Home")]
     public float homeDistanceThreshold = 1f;
 
@@ -114,11 +119,17 @@ public class StateMachine : MonoBehaviour
 
     void Idle()
     {
+        // Idle for a set amount of time
         idleTimeElapsed += Time.deltaTime;
 
         if (idleTimeElapsed >= idleTimeThreshold)
         {
             EnterWander();
+        }
+
+        if (IsInView())
+        {
+            EnterAlert();
         }
     }
 
@@ -143,6 +154,11 @@ public class StateMachine : MonoBehaviour
             else if (stateChance >= grazeChance) EnterGraze();
             else EnterIdle();
         }
+
+        if (IsInView())
+        {
+            EnterAlert();
+        }
     }
 
     void EnterGraze()
@@ -152,17 +168,44 @@ public class StateMachine : MonoBehaviour
 
     void Graze()
     {
-        
+        if (IsInView())
+        {
+            EnterAlert();
+        }
     }
 
     void EnterAlert()
     {
         state = State.Alert;
+        alertTimeElapsed = 0f;
+        // Halt agent movement
+        agent.SetDestination(agent.transform.position);
     }
 
     void Alert()
     {
+        // Check how fast the player is moving
+        bool playerIsSneaking = player.GetComponent<CharacterController>().velocity.magnitude < player.GetComponent<PlayerController>().moveSpeedSneak + 1f;
 
+        // Constantly look at the player if they are in view and moving fast
+        if (IsInView() && !playerIsSneaking)
+        {
+            Vector3 dirToAlert = (player.transform.position - transform.position).normalized;
+            lookAtAlert = Quaternion.LookRotation(dirToAlert);
+            // Reset the alert timer
+            alertTimeElapsed = 0;
+        }
+
+        // Look at the position of the thing that alerted the npc
+        transform.rotation = Quaternion.Lerp(transform.rotation, lookAtAlert, 2 * Time.deltaTime);
+
+        // Be alert for a set amount of time
+        alertTimeElapsed += Time.deltaTime;
+
+        if (alertTimeElapsed > alertTimeThreshold)
+        {
+            EnterWander();
+        }
     }
 
     void EnterFlee()
@@ -173,7 +216,7 @@ public class StateMachine : MonoBehaviour
 
     void Flee()
     {
-        
+        EnterReturnHome();
     }
 
     void EnterReturnHome()
@@ -191,13 +234,25 @@ public class StateMachine : MonoBehaviour
         {
             EnterIdle();
         }
+
+        if (IsInView())
+        {
+            EnterAlert();
+        }
     }
     #endregion
 
     #region Support Methods
     bool IsInView()
     {
-        Vector3 toPlayer = player.transform.position - transform.position;
+        // Adujust the raycast position so that it doesn't hit the ground immediately
+        Vector3 npcPosition = transform.position;
+        npcPosition.y = 1f;
+
+        Vector3 playerPosition = player.transform.position;
+        playerPosition.y = 1f;
+
+        Vector3 toPlayer = playerPosition - npcPosition;
         float distToPlayer = toPlayer.magnitude;
 
         // 1. Distance check
@@ -210,7 +265,7 @@ public class StateMachine : MonoBehaviour
         if (angle > viewAngle * 0.5f) return false;
 
         // 3. Raycast
-        if (Physics.Raycast(transform.position, dirToPlayer, out RaycastHit hit, viewRadius))
+        if (Physics.Raycast(npcPosition, dirToPlayer, out RaycastHit hit, viewRadius))
         {
             return hit.transform == player.transform;
         }

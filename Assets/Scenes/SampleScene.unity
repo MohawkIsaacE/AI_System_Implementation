@@ -1128,6 +1128,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7517686996393243830, guid: 553413393fe29a54c90411067fefee35, type: 3}
+      propertyPath: alertTimeThreshold
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517686996393243830, guid: 553413393fe29a54c90411067fefee35, type: 3}
       propertyPath: wanderWaypointsParent
       value: 
       objectReference: {fileID: 422584701}
