@@ -14,7 +14,7 @@ public class SensoryManager : MonoBehaviour
             SoundObject soundObject = transform.GetComponent<SoundObject>();
             if (soundObject != null)
             {
-                //soundObject.OnSoundTriggered.AddListener(npc.SoundTrigger);
+                soundObject.OnSoundTriggered.AddListener(npc.SoundTrigger);
             }
         }
     }

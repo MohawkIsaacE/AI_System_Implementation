@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -31,10 +32,19 @@ public class StateMachine : MonoBehaviour
     public int grazeChance = 45;
     public int goHomeChance = 90;
 
+    [Header("Graze")]
+    public float grazeTimeElapsed = 0f;
+    public float grazeTimeThreshold = 3f;
+    public float grazeViewAngle = 280f;
+
     [Header("Alert")]
     public float alertTimeElapsed = 0f;
     public float alertTimeThreshold = 5f;
     Quaternion lookAtAlert;
+
+    [Header("Flee")]
+    public float fleeTimeElapsed = 0f;
+    public float fleeTimeThreshold = 1f;
 
     [Header("Home")]
     public float homeDistanceThreshold = 1f;
@@ -46,6 +56,7 @@ public class StateMachine : MonoBehaviour
 
     [Header("Sound")]
     bool heardSound;
+    int heardSoundAmount;
     Vector3 soundPosition;
 
     // NPC
@@ -131,7 +142,7 @@ public class StateMachine : MonoBehaviour
             EnterWander();
         }
 
-        if (IsInView())
+        if (IsInView() || heardSound)
         {
             EnterAlert();
         }
@@ -143,6 +154,7 @@ public class StateMachine : MonoBehaviour
         // Choose a random position to walk towards
         chosenWanderWaypoint = Random.Range(0, wanderWaypoints.Length - 1);
         agent.SetDestination(wanderWaypoints[chosenWanderWaypoint].transform.position);
+        heardSoundAmount = 0;
     }
 
     void Wander()
@@ -159,7 +171,7 @@ public class StateMachine : MonoBehaviour
             else EnterIdle();
         }
 
-        if (IsInView())
+        if (IsInView() || heardSound)
         {
             EnterAlert();
         }
@@ -172,7 +184,9 @@ public class StateMachine : MonoBehaviour
 
     void Graze()
     {
-        if (IsInView())
+
+
+        if (IsInView() || heardSound)
         {
             EnterAlert();
         }
@@ -199,9 +213,11 @@ public class StateMachine : MonoBehaviour
             // Decrease the alert timer
             alertTimeElapsed -= Time.deltaTime;
         }
+        // Look at the sound that triggered the alert state
         else if (heardSound)
         {
             heardSound = false;
+            heardSoundAmount += 1;
             lookAtAlert = Quaternion.LookRotation(soundPosition);
         }
         else
@@ -217,7 +233,7 @@ public class StateMachine : MonoBehaviour
         {
             EnterWander();
         }
-        else if (alertTimeElapsed < -2f)
+        else if (alertTimeElapsed < -2f || heardSoundAmount >= 2)
         {
             // Flee if the player continues to alert the npc
             EnterFlee();
@@ -228,11 +244,26 @@ public class StateMachine : MonoBehaviour
     {
         state = State.Flee;
         agent.speed = speedFlee;
+        fleeTimeElapsed = 0f;
+        heardSoundAmount = 0;
     }
 
     void Flee()
     {
-        EnterReturnHome();
+        // Should look like it is running away from the alert
+        agent.SetDestination(-agent.transform.forward);
+
+        // Stay away from player if they are in the view area
+        if (IsInView())
+        {
+            fleeTimeElapsed = 0f;
+        }
+        else if (fleeTimeElapsed >= fleeTimeThreshold)
+        {
+            EnterReturnHome();
+        }
+
+        fleeTimeElapsed += Time.deltaTime;
     }
 
     void EnterReturnHome()
@@ -249,6 +280,12 @@ public class StateMachine : MonoBehaviour
         if (isCloseToHome)
         {
             EnterIdle();
+        }
+
+        // Flee if the player is in the view area
+        if (IsInView())
+        {
+            EnterFlee();
         }
     }
     #endregion
@@ -273,7 +310,9 @@ public class StateMachine : MonoBehaviour
         Vector3 dirToPlayer = toPlayer.normalized;
         float angle = Vector3.Angle(transform.forward, dirToPlayer);
 
-        if (angle > viewAngle * 0.5f) return false;
+        // Determine which view angle to use based on state
+        float currentViewAngle = state == State.Graze ? grazeViewAngle : viewAngle;
+        if (angle > currentViewAngle * 0.5f) return false;
 
         // 3. Raycast
         if (Physics.Raycast(npcPosition, dirToPlayer, out RaycastHit hit, viewRadius))
@@ -309,8 +348,10 @@ public class StateMachine : MonoBehaviour
         if (canSeePlayer) Handles.color = new Color(1f, 0f, 0f, 0.25f);
 
         Vector3 forward = transform.forward;
-        Handles.DrawSolidArc(transform.position, Vector3.up, forward, viewAngle / 2f, viewRadius);
-        Handles.DrawSolidArc(transform.position, Vector3.up, forward, -viewAngle / 2f, viewRadius);
+        // Determine which view angle to use based on state
+        float currentViewAngle = state == State.Graze ? grazeViewAngle : viewAngle;
+        Handles.DrawSolidArc(transform.position, Vector3.up, forward, currentViewAngle / 2f, viewRadius);
+        Handles.DrawSolidArc(transform.position, Vector3.up, forward, -currentViewAngle / 2f, viewRadius);
     }
     #endregion
 }

@@ -17,10 +17,10 @@ public class SoundObject : MonoBehaviour
 
     public virtual void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<PlayerController>() != null)
+        // Activated when the player or an NPC steps on it
+        if (other.GetComponent<PlayerController>() != null || other.GetComponent<StateMachine>() != null)
         {
             source.Play();
-            Debug.Log("triggered");
             OnSoundTriggered.Invoke(this);
         }
     }
