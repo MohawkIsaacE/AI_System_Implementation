@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     public float gravity = -9.81f;
 
     public InputActionReference moveInput;
+    public GameObject playerCamera;
 
     CharacterController controller;
     PlayerInput playerInput;
@@ -36,7 +37,7 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector2 moveDirection = playerInput.currentActionMap["Move"].ReadValue<Vector2>();
-        Vector3 move = Vector3.right * moveDirection.x + Vector3.forward * moveDirection.y;
+        Vector3 move = playerCamera.transform.right * moveDirection.x / 2 + playerCamera.transform.forward * moveDirection.y;
         Vector3 moveVelocity;
 
         // Change speed if the player is holding the sneak button

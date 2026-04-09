@@ -180,11 +180,18 @@ public class StateMachine : MonoBehaviour
     void EnterGraze()
     {
         state = State.Graze;
+        grazeTimeElapsed = 0f;
     }
 
     void Graze()
     {
+        // Graze for a set amount of time
+        grazeTimeElapsed += Time.deltaTime;
 
+        if (grazeTimeElapsed >= grazeTimeThreshold)
+        {
+            EnterWander();
+        }
 
         if (IsInView() || heardSound)
         {
@@ -310,11 +317,14 @@ public class StateMachine : MonoBehaviour
         Vector3 dirToPlayer = toPlayer.normalized;
         float angle = Vector3.Angle(transform.forward, dirToPlayer);
 
+        // 3. Check if player is moving
+        if (player.GetComponent<CharacterController>().velocity.magnitude <= 0) return false;
+
         // Determine which view angle to use based on state
         float currentViewAngle = state == State.Graze ? grazeViewAngle : viewAngle;
         if (angle > currentViewAngle * 0.5f) return false;
 
-        // 3. Raycast
+        // 4. Raycast
         if (Physics.Raycast(npcPosition, dirToPlayer, out RaycastHit hit, viewRadius))
         {
             return hit.transform == player.transform;
