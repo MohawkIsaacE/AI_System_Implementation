@@ -14,6 +14,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Sneak",
+                    "type": "Button",
+                    "id": "38f760dc-69b4-4000-b3b7-2c988b98e529",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -34,7 +43,7 @@
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Gameplay",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -45,7 +54,7 @@
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Gameplay",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -56,7 +65,7 @@
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Gameplay",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -67,10 +76,21 @@
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Gameplay",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "7853e570-2d54-42d4-bd33-2c0bd6c9f0cd",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gameplay",
+                    "action": "Sneak",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
