@@ -45,6 +45,7 @@ public class StateMachine : MonoBehaviour
     [Header("Flee")]
     public float fleeTimeElapsed = 0f;
     public float fleeTimeThreshold = 1f;
+    private Vector3 positionBehindNPC;
 
     [Header("Home")]
     public float homeDistanceThreshold = 1f;
@@ -253,24 +254,26 @@ public class StateMachine : MonoBehaviour
         agent.speed = speedFlee;
         fleeTimeElapsed = 0f;
         heardSoundAmount = 0;
+        positionBehindNPC = -agent.transform.forward * 2;
     }
 
     void Flee()
     {
         // Should look like it is running away from the alert
-        agent.SetDestination(-agent.transform.forward);
+        //agent.SetDestination(positionBehindNPC);
 
         // Stay away from player if they are in the view area
-        if (IsInView())
-        {
-            fleeTimeElapsed = 0f;
-        }
-        else if (fleeTimeElapsed >= fleeTimeThreshold)
-        {
-            EnterReturnHome();
-        }
+        //if (IsInView())
+        //{
+        //    fleeTimeElapsed = 0f;
+        //}
+        //else if (fleeTimeElapsed >= fleeTimeThreshold)
+        //{
+        //    EnterReturnHome();
+        //}
+        EnterReturnHome();
 
-        fleeTimeElapsed += Time.deltaTime;
+        //fleeTimeElapsed += Time.deltaTime;
     }
 
     void EnterReturnHome()
@@ -290,10 +293,10 @@ public class StateMachine : MonoBehaviour
         }
 
         // Flee if the player is in the view area
-        if (IsInView())
-        {
-            EnterFlee();
-        }
+        //if (IsInView())
+        //{
+        //    EnterFlee();
+        //}
     }
     #endregion
 

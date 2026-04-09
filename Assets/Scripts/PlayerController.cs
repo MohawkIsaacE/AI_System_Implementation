@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
@@ -11,12 +12,13 @@ public class PlayerController : MonoBehaviour
     public float gravity = -9.81f;
 
     public InputActionReference moveInput;
-    public GameObject playerCamera;
+    public Transform playerCamera;
 
     CharacterController controller;
     PlayerInput playerInput;
     Vector3 velocity;
     bool isSneaking;
+    public TextMeshProUGUI playerStateText;
 
     void Awake()
     {
@@ -37,7 +39,7 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector2 moveDirection = playerInput.currentActionMap["Move"].ReadValue<Vector2>();
-        Vector3 move = playerCamera.transform.right * moveDirection.x / 2 + playerCamera.transform.forward * moveDirection.y;
+        Vector3 move = playerCamera.transform.right * moveDirection.x + playerCamera.transform.forward * moveDirection.y;
         Vector3 moveVelocity;
 
         // Change speed if the player is holding the sneak button
@@ -45,10 +47,12 @@ public class PlayerController : MonoBehaviour
         if (isSneaking)
         {
             moveVelocity = move * moveSpeedSneak;
+            playerStateText.text = "Sneaking";
         }
         else
         {
             moveVelocity = move * moveSpeedNormal;
+            playerStateText.text = "Walking";
         }
 
         velocity.y += gravity * Time.deltaTime;
@@ -62,11 +66,7 @@ public class PlayerController : MonoBehaviour
         if (horizontalVelocity.sqrMagnitude > 0.001f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity);
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                15f * Time.deltaTime
-            );
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
         }
     }
 }
