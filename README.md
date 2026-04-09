@@ -1,6 +1,16 @@
 # AI_System_Implementation
 Link to video showing gameplay <br>
 
+States Chart
+| State | Behaviour | Transitions |
+| ------|-----------|------------ |
+| Idle | Wait for a set amount of time before coming out of the "Home" area. | **Wander**: At the end of the timer, transition to the Wander state<br> **Alert**: When the player is in the vision cone moving above a certain velocity, or a loud sound happens (player or NPC) |
+| Wander | Walk to a random spot from an array of determined spots. Upon reaching a spot, choose whether to Graze or Idle based on a chance. Will return home after a certain amount of time. Can be alerted by the player through Sound or Vision. Can also be alerted by itself if it steps on something loud/surprising. | **Idle/Graze/Return Home**: Determined randomly (still deterministic for the transitions) when arriving at a Wander spot<br> **Alert**: When the player is in the vision cone moving above a certain velocity, or a loud sound happens (player or NPC) |
+| Graze | Stops and eats for a moment. After the time it takes to eat, wander to another spot. Can be alerted by the player or itself. Has reduced vision while in this state. | **Wander**: After eating timer runs out, return to wandering<br> **Alert**: When the player is in the vision cone moving above a certain velocity, or a loud sound happens (player or NPC) |
+| Alert | Timer starts to check when to go back to wandering. Timer is interrupted and the NPC flees if there is another noise triggered while in the alert state, or if the player moves too far from the spot when the NPC was initially alerted. | **Wander**: After the alert timer runs out, return to wandering<br> **Flee**: Run away if, while the alert timer is still active, there is a sound triggered or player has moved too far from the spot they were in when the Alert state was entered. |
+| Flee | Increase NPC speed and return to the "Home" area. | **Return Home**: Transition to this state when the NPC is in the "Home" area |
+| Return Home | Arrive at the "Home" area and then idle until the timer runs out. The timer can be reset if the NPC is alerted. Speed is reset when arriving home. | **Idle**: Entered when the NPC reaches the home area<br> **Flee**: Enters flee if player is in the view area while trying to return home|
+
 References
 - [Animal prefabs package](https://assetstore.unity.com/packages/3d/characters/animals/animals-free-animated-low-poly-3d-models-260727)
 - [Sticks prefabs](https://assetstore.unity.com/packages/3d/vegetation/trees/low-poly-wood-pack-stylized-wooden-models-321987)
