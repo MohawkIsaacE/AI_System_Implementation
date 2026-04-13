@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -29,6 +30,12 @@ public class PlayerController : MonoBehaviour
     public void Update()
     {
         PlayerMotion();
+
+        // Debug reset button
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 
     void PlayerMotion()
@@ -39,7 +46,8 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector2 moveDirection = playerInput.currentActionMap["Move"].ReadValue<Vector2>();
-        Vector3 move = playerCamera.transform.right * moveDirection.x + playerCamera.transform.forward * moveDirection.y;
+        //Vector3 move = playerCamera.transform.right * moveDirection.x + playerCamera.transform.forward * moveDirection.y;
+        Vector3 move = Vector3.right * moveDirection.x + Vector3.forward * moveDirection.y;
         Vector3 moveVelocity;
 
         // Change speed if the player is holding the sneak button

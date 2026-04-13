@@ -39,7 +39,9 @@ public class StateMachine : MonoBehaviour
 
     [Header("Alert")]
     public float alertTimeElapsed = 0f;
-    public float alertTimeThreshold = 5f;
+    public float alertTimeThreshold = 4f;
+    public float continuousAlertTimer = 0f;
+    public Vector3 playerPositionOnAlert;
     Quaternion lookAtAlert;
 
     [Header("Flee")]
@@ -204,22 +206,25 @@ public class StateMachine : MonoBehaviour
     {
         state = State.Alert;
         alertTimeElapsed = 0f;
+        continuousAlertTimer = 0f;
         // Halt agent movement
         agent.SetDestination(agent.transform.position);
+        playerPositionOnAlert = player.transform.position;
     }
 
     void Alert()
     {
-        // Check how fast the player is moving
-        bool playerIsSneaking = player.GetComponent<CharacterController>().velocity.magnitude < player.GetComponent<PlayerController>().moveSpeedSneak + 1f;
+        // Calculate how far the player has moved since entering alert
+        float playerMoveDistance = (player.transform.position - playerPositionOnAlert).magnitude;
 
-        // Constantly look at the player if they are in view and moving fast
-        if (IsInView() && !playerIsSneaking)
+        // Constantly look at the player if they are in view and has moved far enough
+        if (IsInView() && playerMoveDistance >= 1f)
         {
             Vector3 dirToAlert = (player.transform.position - transform.position).normalized;
             lookAtAlert = Quaternion.LookRotation(dirToAlert);
             // Decrease the alert timer
-            alertTimeElapsed -= Time.deltaTime;
+            alertTimeElapsed = 0;
+            continuousAlertTimer += Time.deltaTime;
         }
         // Look at the sound that triggered the alert state
         else if (heardSound)
@@ -241,7 +246,7 @@ public class StateMachine : MonoBehaviour
         {
             EnterWander();
         }
-        else if (alertTimeElapsed < -2f || heardSoundAmount >= 2)
+        else if (continuousAlertTimer >= 0.5f || heardSoundAmount >= 2)
         {
             // Flee if the player continues to alert the npc
             EnterFlee();
@@ -321,7 +326,7 @@ public class StateMachine : MonoBehaviour
         float angle = Vector3.Angle(transform.forward, dirToPlayer);
 
         // 3. Check if player is moving
-        if (player.GetComponent<CharacterController>().velocity.magnitude <= 0) return false;
+        //if (player.GetComponent<CharacterController>().velocity.magnitude <= 0) return false;
 
         // Determine which view angle to use based on state
         float currentViewAngle = state == State.Graze ? grazeViewAngle : viewAngle;
@@ -339,6 +344,14 @@ public class StateMachine : MonoBehaviour
     {
         heardSound = true;
         soundPosition = sound.transform.position;
+    }
+
+    private void OnTriggerEnter(Collider collision)
+    {
+        if (collision.gameObject.tag == "Player")
+        {
+            Destroy(gameObject);
+        }
     }
     #endregion
 
